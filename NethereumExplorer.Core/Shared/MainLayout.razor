@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.Extensions.Options
+@using NethereumExplorer.Core.Model
+@using NethereumExplorer.Services
+@using NethereumExplorer.ViewModels
+@using ReactiveUI
+@inherits LayoutComponentBase
+@inject NewBlockProcessingService NewBlockProcessingService
+@inject Web3UrlViewModel Web3UrlViewModel
+@inject NavigationManager NavigationManager
+@inject IOptions<NetworkConfigurationModel> NetworkConfiguration
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+<div class="main">
+    <nav class="navbar navbar-light bg-light">
+        <div class="form-inline">
+            <select class="form-control mr-sm-2" disabled="disabled">
+                <option value="@NetworkConfiguration.Value.Url" selected>@NetworkConfiguration.Value.Url</option>
+            </select>
+        </div>
+    </nav>
+    <div class="content px-4">
+        @Body
+    </div>
+    <Toasts />
+</div>
+@code { 
+    public string Query { get; set; }
+    public bool QueryError { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        Web3UrlViewModel.Url = NetworkConfiguration.Value.Url;
+        NewBlockProcessingService.WhenAnyValue(x => x.Loading).SubscribeAndNotifyStateChanges(InvokeAsync, StateHasChanged);
+    } 
+}
